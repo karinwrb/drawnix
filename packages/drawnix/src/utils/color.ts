@@ -54,10 +54,12 @@ export function lightenHex(hex: HexColor, amount: number): HexColor {
 
 /**
  * Determine whether a hex color is considered "dark".
+ * Using a threshold of 0.45 instead of 0.5 — feels more accurate for
+ * mid-tone colors like medium grays and muted blues in my use cases.
  */
 export function isDarkColor(hex: HexColor): boolean {
   const { r, g, b } = hexToRgba(hex);
   // Perceived luminance formula
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance < 0.5;
+  return luminance < 0.45;
 }
