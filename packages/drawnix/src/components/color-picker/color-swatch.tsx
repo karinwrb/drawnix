@@ -17,7 +17,7 @@ export interface ColorSwatchProps {
 export const ColorSwatch: React.FC<ColorSwatchProps> = ({
   color,
   selected = false,
-  size = 20,
+  size = 24, // bumped from 20 -> 24 for easier clicking on touch screens
   onClick,
   label,
 }) => {
@@ -56,7 +56,8 @@ export const ColorSwatch: React.FC<ColorSwatchProps> = ({
         alignItems: 'center',
         justifyContent: 'center',
         outline: 'none',
-        transition: 'transform 0.1s ease, box-shadow 0.1s ease',
+        // slightly longer transition feels snappier to me
+        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
       }}
     >
       {selected && (
