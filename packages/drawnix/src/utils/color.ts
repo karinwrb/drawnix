@@ -7,6 +7,7 @@ export type RgbaColor = { r: number; g: number; b: number; a: number };
 
 /**
  * Convert a hex color string to an RGBA object.
+ * Supports 3-digit, 6-digit, and 8-digit (with alpha) hex strings.
  */
 export function hexToRgba(hex: HexColor, alpha = 1): RgbaColor {
   const sanitized = hex.replace('#', '');
@@ -47,6 +48,17 @@ export function hexToCssRgba(hex: HexColor, alpha = 1): string {
 export function lightenHex(hex: HexColor, amount: number): HexColor {
   const { r, g, b } = hexToRgba(hex);
   const clamp = (v: number) => Math.min(255, Math.round(v + (255 - v) * (amount / 100)));
+  return `#${[clamp(r), clamp(g), clamp(b)]
+    .map((v) => v.toString(16).padStart(2, '0'))
+    .join('')}`;
+}
+
+/**
+ * Darken a hex color by a given percentage (0–100).
+ */
+export function darkenHex(hex: HexColor, amount: number): HexColor {
+  const { r, g, b } = hexToRgba(hex);
+  const clamp = (v: number) => Math.max(0, Math.round(v * (1 - amount / 100)));
   return `#${[clamp(r), clamp(g), clamp(b)]
     .map((v) => v.toString(16).padStart(2, '0'))
     .join('')}`;
