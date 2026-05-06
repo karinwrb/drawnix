@@ -17,7 +17,7 @@ export interface ColorSwatchProps {
 export const ColorSwatch: React.FC<ColorSwatchProps> = ({
   color,
   selected = false,
-  size = 24,
+  size = 20,
   onClick,
   label,
 }) => {
@@ -49,7 +49,8 @@ export const ColorSwatch: React.FC<ColorSwatchProps> = ({
         borderRadius: '50%',
         backgroundColor: hexToCssRgba(color),
         border: selected ? `2px solid ${checkColor}` : '2px solid transparent',
-        boxShadow: selected ? `0 0 0 2px ${color}` : '0 1px 3px rgba(0,0,0,0.2)',
+        // use the swatch color itself for the outer ring so it blends better
+        boxShadow: selected ? `0 0 0 2px ${color}` : '0 1px 2px rgba(0,0,0,0.15)',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
