@@ -1,94 +1,63 @@
-import { DEFAULT_COLOR, PlaitBoard } from '@plait/core';
-import { TRANSPARENT, NO_COLOR, WHITE } from '../constants/color';
+/**
+ * Color utility functions for drawnix
+ */
 
-// 将 0-100 的透明度转换为 0-255 的整数
-function transparencyToAlpha255(transparency: number) {
-  return Math.round(((100 - transparency) / 100) * 255);
+export type HexColor = string;
+export type RgbaColor = { r: number; g: number; b: number; a: number };
+
+/**
+ * Convert a hex color string to an RGBA object.
+ */
+export function hexToRgba(hex: HexColor, alpha = 1): RgbaColor {
+  const sanitized = hex.replace('#', '');
+  const full =
+    sanitized.length === 3
+      ? sanitized
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : sanitized;
+
+  const bigint = parseInt(full, 16);
+  return {
+    r: (bigint >> 16) & 255,
+    g: (bigint >> 8) & 255,
+    b: bigint & 255,
+    a: Math.min(1, Math.max(0, alpha)),
+  };
 }
 
-// 将 0-255 的 alpha 值转换为 0-100 的透明度
-function alpha255ToTransparency(alpha255: number) {
-  return Math.round((1 - alpha255 / 255) * 100);
+/**
+ * Convert an RGBA object to a CSS rgba() string.
+ */
+export function rgbaToCss({ r, g, b, a }: RgbaColor): string {
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-export function applyOpacityToHex(hexColor: string, opacity: number) {
-  const alpha = transparencyToAlpha255(100 - opacity);
-  const alphaHex = alpha.toString(16).padStart(2, '0');
-  return `${hexColor}${alphaHex}`;
+/**
+ * Convert a hex color + optional alpha to a CSS rgba() string.
+ */
+export function hexToCssRgba(hex: HexColor, alpha = 1): string {
+  return rgbaToCss(hexToRgba(hex, alpha));
 }
 
-export function hexAlphaToOpacity(hexColor: string) {
-  // 移除可能存在的 # 前缀
-  hexColor = hexColor.replace(/^#/, '');
-
-  let alpha;
-  if (hexColor.length === 8) {
-    // 8位十六进制，提取最后两位作为 alpha 值
-    alpha = parseInt(hexColor.slice(6, 8), 16);
-  } else if (hexColor.length === 4) {
-    // 4位十六进制（简写形式），提取最后一位并重复
-    alpha = parseInt(hexColor.slice(3, 4).repeat(2), 16);
-  } else {
-    // 如果没有 alpha 通道，则认为是完全不透明
-    return 100;
-  }
-
-  return 100 - alpha255ToTransparency(alpha);
+/**
+ * Lighten a hex color by a given percentage (0–100).
+ */
+export function lightenHex(hex: HexColor, amount: number): HexColor {
+  const { r, g, b } = hexToRgba(hex);
+  const clamp = (v: number) => Math.min(255, Math.round(v + (255 - v) * (amount / 100)));
+  return `#${[clamp(r), clamp(g), clamp(b)]
+    .map((v) => v.toString(16).padStart(2, '0'))
+    .join('')}`;
 }
 
-export function isValidColor(color: string) {
-  if (color === 'none') {
-    return false;
-  }
-  return true;
-}
-
-export function removeHexAlpha(hexColor: string) {
-  // 移除可能存在的 # 前缀，并转换为大写
-  const hexColorClone = hexColor.replace(/^#/, '').toUpperCase();
-
-  if (hexColorClone.length === 8) {
-    // 8位十六进制，移除最后两位
-    return '#' + hexColorClone.slice(0, 6);
-  } else if (hexColorClone.length === 4) {
-    // 4位十六进制（简写形式），移除最后一位
-    return '#' + hexColorClone.slice(0, 3);
-  } else if (hexColorClone.length === 6 || hexColorClone.length === 3) {
-    // 已经是标准的 6 位或 3 位形式，直接返回
-    return '#' + hexColorClone;
-  } else {
-    return hexColor;
-  }
-}
-
-export function isTransparent(color?: string) {
-  return color === TRANSPARENT;
-}
-
-export function isWhite(color?: string) {
-  return color === WHITE || color === WHITE.toLocaleLowerCase();
-}
-
-export function isFullyTransparent(opacity: number) {
-  return opacity === 0;
-}
-
-export function isFullyOpaque(opacity: number) {
-  return opacity === 100;
-}
-
-export function isNoColor(value: string) {
-  return value === NO_COLOR;
-}
-
-export function isDefaultStroke(color?: string) {
-  return !color || color === DEFAULT_COLOR;
-}
-
-export function getBackgroundColor(board: PlaitBoard) {
-  const themeColors = PlaitBoard.getThemeColors(board);
-  const themeColor = themeColors.find(
-    (val) => val.mode === board.theme.themeColorMode
-  );
-  return themeColor?.boardBackground;
+/**
+ * Determine whether a hex color is considered "dark".
+ */
+export function isDarkColor(hex: HexColor): boolean {
+  const { r, g, b } = hexToRgba(hex);
+  // Perceived luminance formula
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance < 0.5;
 }
