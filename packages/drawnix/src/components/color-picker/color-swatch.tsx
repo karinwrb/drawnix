@@ -17,7 +17,7 @@ export interface ColorSwatchProps {
 export const ColorSwatch: React.FC<ColorSwatchProps> = ({
   color,
   selected = false,
-  size = 24, // bumped from 20 -> 24 for easier clicking on touch screens
+  size = 28, // bumped from 24 -> 28; feels more comfortable on my 13" laptop screen
   onClick,
   label,
 }) => {
